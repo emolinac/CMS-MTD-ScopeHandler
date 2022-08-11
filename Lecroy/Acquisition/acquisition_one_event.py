@@ -8,23 +8,23 @@ import time
 import shutil
 import datetime
 from shutil import copy
-import visa
+import pyvisa
 import glob
 
 """#################SEARCH/CONNECT#################"""
 # establish communication with scope
 initial = time.time()
-rm = visa.ResourceManager("@py")
-lecroy = rm.open_resource('TCPIP0::192.168.99.169::INSTR')
+rm = pyvisa.ResourceManager()
+lecroy = rm.open_resource('TCPIP0::LECROY::inst0::INSTR')
 lecroy.timeout = 3000000
 lecroy.encoding = 'latin_1'
 lecroy.clear()
 
-run_log_path = "/home/daq/LecroyControl/Acquisition/RunLog.txt"
+run_log_path = "C:\\Users\\lgad\\Documents\\lecroy-scripts\\ScopeHandler-master\\Lecroy\\Acquisition\\RunLog.txt"
 
 
 def GetNextNumber():
-    run_num_file = "/home/daq/LecroyControl/Acquisition/next_run_number.txt"
+    run_num_file = "C:\\Users\\lgad\\Documents\\lecroy-scripts\\ScopeHandler-master\\Lecroy\\Acquisition\\next_run_number.txt"
     FileHandle = open(run_num_file)
     nextNumber = int(FileHandle.read().strip())
     FileHandle.close()
@@ -152,10 +152,10 @@ time_div_in_ns = nsamples /(10*sample_rate_in_GS)
 lecroy.write("TIME_DIV %iNS"%time_div_in_ns)
 lecroy.write("MSIZ %i"%nsamples)
 
-print "\tMake sure sampling rate is set to desired value manually."
+print("\tMake sure sampling rate is set to desired value manually.")
 # lecroy.write("TIME_DIV e-9")
 
-print "Setting horizontal offset %0.2f s" %timeoffset
+print("Setting horizontal offset %0.2f s" %timeoffset)
 lecroy.write("TRIG_DELAY %0.2f s" % timeoffset)
 
 
@@ -190,7 +190,7 @@ run_logf.close()
 start = time.time()
 now = datetime.datetime.now()
 current_time = now.strftime("%H:%M:%S")
-print "\n \n \n  -------------  Starting acquisition for run %i at %s. ---------------"%(runNumber,current_time)
+print ("\n \n \n  -------------  Starting acquisition for run %i at %s. ---------------"%(runNumber,current_time))
 lecroy.write("*TRG")
 #prewait = time.time()
 #lecroy.query(r"""vbs? 'app.waituntilidle(7)' """)
@@ -214,8 +214,8 @@ lecroy.query("ALST?")
 
 end = time.time()
 duration = end-start
-print "\n \n \n  -------------  Acquisition complete.   ------------------------"
-print "\tAcquisition duration: %0.4f s"%duration
+print ("\n \n \n  -------------  Acquisition complete.   ------------------------")
+print ("\tAcquisition duration: %0.4f s"%duration)
 # print "\tTrigger rate: %0.1f Hz" %(nevents/duration)
 
 # print("Storage configuration:")
@@ -235,7 +235,7 @@ start = time.time()
 # lecroy.write("STORE")
 
 for ichan in range(1,9):
-       print "Saving channel %i"%ichan
+       print ("Saving channel %i"%ichan)
        lecroy.write("STORE_SETUP C%i,HDD,AUTO,OFF,FORMAT,BINARY"%ichan)
        lecroy.write(r"""vbs 'app.SaveRecall.Waveform.SaveFilename="C%i--Trace%i.trc" ' """%(ichan,int(runNumber)))
        lecroy.write(r"""vbs 'app.SaveRecall.Waveform.SaveFile' """)
@@ -267,8 +267,8 @@ print("Waveform storage complete. \n\tStoring waveforms took %0.4f s" % (end - s
 lecroy.close()
 rm.close()
 final = time.time()
-print "\nFinished run %i."%runNumber
-print "Full script duration: %0.f s"%(final-initial)
+print ("\nFinished run %i."%runNumber)
+print ("Full script duration: %0.f s"%(final-initial))
 tmp_file2 = open(run_log_path,"w")
 status = "ready"
 tmp_file2.write(status)
